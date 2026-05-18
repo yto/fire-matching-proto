@@ -35,6 +35,10 @@ async function init() {
   state.qs = data.questions;
   state.answers = Array(state.qs.length).fill(null);
 
+  if (state.uuid) {
+    await loadPrevAnswers();
+  }
+
   renderQuestions();
   updateSubmitBtnState();
   renderIdentityCard();
@@ -47,6 +51,24 @@ async function init() {
   els.postSubmit.addEventListener("click", submitPost);
   els.usernameInput.addEventListener("input", updatePostSubmitState);
   els.viewClose.addEventListener("click", () => els.viewDialog.close());
+}
+
+async function loadPrevAnswers() {
+  try {
+    const r = await fetch("/api/answers");
+    const d = await r.json();
+    const me = (d.rows || []).find((row) => row.uuid === state.uuid);
+    if (me && Array.isArray(me.answers)) {
+      const n = state.qs.length;
+      for (let i = 0; i < n; i++) {
+        if (me.answers[i] === "Yes" || me.answers[i] === "No") {
+          state.answers[i] = me.answers[i];
+        }
+      }
+    }
+  } catch (_) {
+    // 取得失敗時は無視（初期状態のまま）
+  }
 }
 
 function renderQuestions() {

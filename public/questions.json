@@ -1,0 +1,101 @@
+{
+  "source": "https://masaoga0517-lgtm.github.io/fire-check/",
+  "questions": [
+    {
+      "number": 1,
+      "q": "仕事・労働をしていますか？",
+      "a1": {
+        "value": "Yes",
+        "label": "している",
+        "description": "仕事・副業・ボランティアあり",
+        "emoji": "✅"
+      },
+      "a2": {
+        "value": "No",
+        "label": "していない",
+        "description": "完全にFIRE状態",
+        "emoji": "🌴"
+      }
+    },
+    {
+      "number": 2,
+      "q": "生活を支える資産・収入がありますか？",
+      "a1": {
+        "value": "Yes",
+        "label": "ある",
+        "description": "経済的に安定している",
+        "emoji": "💎"
+      },
+      "a2": {
+        "value": "No",
+        "label": "不安がある",
+        "description": "経済的な不安を感じる",
+        "emoji": "😰"
+      }
+    },
+    {
+      "number": 3,
+      "q": "自分の時間が十分にありますか？",
+      "a1": {
+        "value": "Yes",
+        "label": "ある",
+        "description": "自由な時間が豊富",
+        "emoji": "🕊️"
+      },
+      "a2": {
+        "value": "No",
+        "label": "少ない",
+        "description": "やりたいことに時間が足りない",
+        "emoji": "⏳"
+      }
+    },
+    {
+      "number": 4,
+      "q": "健康・メンタルの状態は良好ですか？",
+      "a1": {
+        "value": "Yes",
+        "label": "良好",
+        "description": "心身ともに元気",
+        "emoji": "💪"
+      },
+      "a2": {
+        "value": "No",
+        "label": "不調がある",
+        "description": "体調・メンタルに不安あり",
+        "emoji": "🩺"
+      }
+    },
+    {
+      "number": 5,
+      "q": "人との繋がりはありますか？",
+      "a1": {
+        "value": "Yes",
+        "label": "ある",
+        "description": "良好な人間関係がある",
+        "emoji": "👥"
+      },
+      "a2": {
+        "value": "No",
+        "label": "少ない",
+        "description": "孤独を感じることが多い",
+        "emoji": "🏝️"
+      }
+    },
+    {
+      "number": 6,
+      "q": "自己実現・挑戦できていますか？",
+      "a1": {
+        "value": "Yes",
+        "label": "できている",
+        "description": "やりがいや挑戦がある",
+        "emoji": "🌱"
+      },
+      "a2": {
+        "value": "No",
+        "label": "できていない",
+        "description": "停滞感・退屈を感じる",
+        "emoji": "😐"
+      }
+    }
+  ]
+}

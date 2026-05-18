@@ -1,0 +1,9 @@
+name = "fire-matching-proto"
+compatibility_date = "2026-05-17"
+pages_build_output_dir = "./public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "fire-matching-proto-db"
+database_id = "6a266ac8-46f1-4b0d-8904-5cec400744c7"
+migrations_dir = "migrations"

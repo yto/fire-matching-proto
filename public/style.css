@@ -1,0 +1,268 @@
+* { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
+    "Yu Gothic", "Meiryo", sans-serif;
+  background: #f5f6f8;
+  color: #222;
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin: 0 0 16px;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin: 0 0 12px;
+}
+
+.identity-card {
+  background: #fff8e1;
+  border: 1px solid #f0d97a;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.identity-card button {
+  background: #f5b400;
+  color: #fff;
+  border: 0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.identity-card button:hover {
+  background: #e3a200;
+}
+
+#questions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e2e4e8;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.card .qnum {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.card .q {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.card .btns {
+  display: flex;
+  gap: 8px;
+}
+
+.card .btns button {
+  flex: 1;
+  padding: 12px 10px;
+  font-size: 1rem;
+  background: #fff;
+  border: 2px solid #d6d8de;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.card .btns button .ans-main {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.card .btns button .ans-label {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.card .btns button .ans-desc {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.card .btns button:hover {
+  border-color: #999;
+}
+
+.card .btns button.selected {
+  border-color: #2a6df4;
+  background: #e8f0ff;
+  color: #1c4cb8;
+  font-weight: 700;
+}
+
+.card .btns button.selected .ans-label,
+.card .btns button.selected .ans-desc {
+  color: #1c4cb8;
+}
+
+.submit-row {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+#submit-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  background: #2a6df4;
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+#submit-btn:hover:not(:disabled) {
+  background: #1c4cb8;
+}
+
+#submit-btn:disabled {
+  background: #c8cbd2;
+  cursor: not-allowed;
+}
+
+.submit-hint {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0;
+  min-height: 1.2em;
+}
+
+dialog {
+  border: 0;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 90vw;
+  width: 560px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.field span {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.field input {
+  padding: 10px;
+  border: 1px solid #c8cbd2;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dialog-actions button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #c8cbd2;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.dialog-actions button#post-submit,
+.dialog-actions button#view-close {
+  background: #2a6df4;
+  color: #fff;
+  border-color: #2a6df4;
+}
+
+.dialog-actions button:disabled {
+  background: #d0d5dd;
+  color: #fff;
+  border-color: #d0d5dd;
+  cursor: not-allowed;
+}
+
+#view-table-wrap {
+  max-height: 60vh;
+  overflow: auto;
+  margin-bottom: 16px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th, td {
+  border: 1px solid #e2e4e8;
+  padding: 6px 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+th {
+  background: #f0f1f4;
+  position: sticky;
+  top: 0;
+}
+
+th:first-child, td:first-child {
+  text-align: left;
+}
+
+tr.me td {
+  background: #e8f0ff;
+  font-weight: 600;
+}
+
+td.match {
+  background: #e3f5e1;
+}

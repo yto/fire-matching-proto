@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIREマッチング プロトタイプ</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <h1>FIREマッチング プロトタイプ</h1>
+
+    <section id="identity-card" class="identity-card" hidden>
+      <div class="identity-text">ようこそ <strong id="identity-name"></strong> さん</div>
+      <button type="button" id="open-view-from-card">みんなの回答を見る</button>
+    </section>
+
+    <section id="questions"></section>
+
+    <div class="submit-row">
+      <button type="button" id="submit-btn" disabled>回答を投稿する</button>
+      <p class="submit-hint" id="submit-hint">全ての質問に回答してください</p>
+    </div>
+
+    <dialog id="post-dialog">
+      <form method="dialog" id="post-form">
+        <h2>回答を投稿</h2>
+        <label class="field">
+          <span>名前（未入力の場合はランダムな8桁の数字）</span>
+          <input type="text" id="username-input" maxlength="64" autocomplete="off">
+        </label>
+        <div class="dialog-actions">
+          <button type="button" id="post-cancel">キャンセル</button>
+          <button type="button" id="post-submit" disabled>回答を投稿する</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="view-dialog">
+      <h2>みんなの回答</h2>
+      <div id="view-table-wrap"></div>
+      <div class="dialog-actions">
+        <button type="button" id="view-close">閉じる</button>
+      </div>
+    </dialog>
+  </main>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

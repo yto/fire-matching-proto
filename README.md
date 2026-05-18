@@ -1,7 +1,10 @@
 # fire-matching-proto
 
-FIRE 状態に関する 6 問の Yes/No 質問に答えて、他のユーザの回答と「一致回答数」で並べて比較できるプロトタイプ。
+FIREマッチング プロトタイプ。FIRE 状態に関する複数のYes/No質問に答え、他ユーザの回答と「一致回答数」で並べて比較できる。
 
+本番: **https://fire-matching-proto.pages.dev/**
+
+技術スタック:
 - Cloudflare Pages（静的配信）
 - Cloudflare Pages Functions（API）
 - Cloudflare D1（SQLite）
@@ -11,108 +14,72 @@ FIRE 状態に関する 6 問の Yes/No 質問に答えて、他のユーザの�
 
 ```
 fire-matching-proto/
-├── .github/workflows/deploy.yml    # GitHub Actions: migrations 適用 + Pages デプロイ
-├── functions/api/answers.js        # GET (全件) / POST (UPSERT)
+├── .github/workflows/deploy.yml    # GitHub Actions: D1 migration 適用 + Pages デプロイ
+├── functions/api/answers.js        # GET (全件返却) / POST (UPSERT)
 ├── migrations/0001_init.sql        # users / answers の 2 テーブル
 ├── public/
 │   ├── index.html
 │   ├── style.css
 │   ├── app.js
-│   └── questions.json              # 6問の質問データ
-├── wrangler.toml                   # database_id は手動で記入
+│   └── questions.json              # 質問データ（N問、N可変）
+├── wrangler.toml                   # database_id を記入
 └── .gitignore
 ```
 
-## セットアップ手順
+## 画面・UX 仕様
 
-### 1. Wrangler ログイン
+### TOP（質問ページ）
 
-```bash
-npx wrangler login
-```
+- `public/questions.json` の `questions[]` を `fetch` し、N 個の **質問カード** を縦に並べて表示
+- 各カードの構成（上→下）:
+  - `Q{number}` ラベル
+  - 質問文（`q.q`）
+  - 2 ボタン（左 Yes / 右 No）。ボタンは縦 3 段表示:
+    1. `{emoji} Yes` / `{emoji} No`（`q.a1.emoji`, `q.a2.emoji`）
+    2. ラベル（`q.a1.label`, `q.a2.label`）
+    3. 説明（`q.a1.description`, `q.a2.description`）
+- ボタンクリックで選択トグル。選択中は青い枠＋背景でハイライト
+- 質問群の下に **「回答を投稿する」ボタン**
+  - 全問回答するまで disabled（下に「全ての質問に回答してください」と表示）
+  - 押すと投稿モーダルを開く
+- 自動オープンはしない（必ずボタンクリック起点）
 
-ブラウザで Cloudflare の認可ページが開きます。
+### identity-card（TOP 上部、条件付き表示）
 
-### 2. D1 データベースを作成
+- localStorage に `fmp_uuid` がある時 **のみ表示**（初回訪問では非表示）
+- 内容: 「ようこそ `{username}` さん」 + ボタン **「みんなの回答を見る」**
+- ボタンを押すと **閲覧モーダル** を開く（投稿モーダルではない）
+- ページ読み込み時に `fmp_uuid` があれば、サーバから前回回答を取得して **回答ボタンを選択済み状態で復元** する
 
-```bash
-npx wrangler d1 create fire-matching-proto-db
-```
+### 投稿モーダル
 
-出力に表示される `database_id` を `wrangler.toml` の該当行に貼り付けてください。
+- 名前入力欄（任意）
+  - 初期値: 前回の username があればそれ、無ければ **ランダム8桁の数字（先頭非0）**
+- 「回答を投稿する」ボタン
+  - 全問回答済みかつ名前が非空の時のみ enabled
+  - 押すと `POST /api/answers` で送信
+- 投稿成功:
+  - 初回なら `crypto.randomUUID()` で UUID を生成 → `fmp_uuid` を localStorage に保存
+  - 名前を `fmp_username` に保存
+  - 投稿モーダルを閉じて閲覧モーダルを開く
+- 再投稿: 同じ uuid で送信 → **上書き保存**（1 UUID につき最新1件）
 
-```toml
-[[d1_databases]]
-binding = "DB"
-database_name = "fire-matching-proto-db"
-database_id = "<ここに貼る>"
-migrations_dir = "migrations"
-```
+### 閲覧モーダル
 
-### 3. Cloudflare API Token を作成
-
-1. Cloudflare Dashboard → 右上アバター → **My Profile** → **API Tokens** → **Create Token**
-2. テンプレ「**Edit Cloudflare Workers**」を選択
-3. 権限に以下が含まれていることを確認:
-   - Account: Cloudflare Pages: Edit
-   - Account: D1: Edit
-   - Account: Workers Scripts: Edit
-   - User: User Details: Read
-4. Account Resources を対象アカウントに限定
-5. Token を作成しコピー
-
-### 4. Cloudflare Account ID を取得
-
-Dashboard の右サイドバーに表示されている **Account ID** をコピー。
-
-### 5. GitHub Secrets を登録
-
-リポジトリ → **Settings** → **Secrets and variables** → **Actions** で以下を登録:
-
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
-
-### 6. push でデプロイ
-
-```bash
-git add -A
-git commit -m "init"
-git push origin main
-```
-
-GitHub Actions が以下を実行します:
-
-1. D1 にリモートマイグレーション適用
-2. Pages プロジェクト作成（初回のみ、2回目以降は失敗するが無視）
-3. `./public` を Pages にデプロイ
-
-デプロイ後 URL: `https://fire-matching-proto.pages.dev/`
-
-## ローカル動作確認
-
-```bash
-# 1. ローカル D1 にマイグレーション適用
-npx wrangler d1 migrations apply fire-matching-proto-db --local
-
-# 2. Pages dev 起動（functions と D1 binding 込みで自動起動）
-npx wrangler pages dev ./public
-```
-
-ブラウザで `http://127.0.0.1:8788/` を開いて動作確認。
-
-DB 中身確認:
-
-```bash
-npx wrangler d1 execute fire-matching-proto-db --local --command "SELECT * FROM users"
-npx wrangler d1 execute fire-matching-proto-db --local --command "SELECT * FROM answers"
-```
+- `GET /api/answers` で全件取得し表形式で表示
+- 列ヘッダ: `名前 | A1 | A2 | ... | AN`（A の番号は質問 Q の番号に対応）
+- 行:
+  - **先頭が自分**（青背景でハイライト）。名前はそのまま
+  - 以降は自分以外を **一致回答数 DESC**（多い順 = 近い順）でソート。名前の後ろに ` (一致数)` を付与
+- セル:
+  - Yes なら `{q.aN.a1.emoji}Yes`、No なら `{q.aN.a2.emoji}No`
+  - 自分以外の行で自分と同じ回答のセルは **緑背景でハイライト**
 
 ## API 仕様
 
 ### `POST /api/answers`
 
 Request:
-
 ```json
 {
   "uuid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -121,14 +88,14 @@ Request:
 }
 ```
 
-Response: `{ "ok": true }`
+- validation: `uuid` 非空文字列、`username` 非空文字列、`answers` は `"Yes"` / `"No"` のみの配列
+- `users` と `answers` の両テーブルを `env.DB.batch([...])` で同一バッチで `INSERT ... ON CONFLICT(uuid) DO UPDATE`（UPSERT）
 
-同じ `uuid` で再送すると **上書き** されます（1 UUID につき最新 1 件）。
+Response: `{ "ok": true }` / エラー時 `{ "error": "..." }` (400)
 
 ### `GET /api/answers`
 
 Response:
-
 ```json
 {
   "rows": [
@@ -141,6 +108,9 @@ Response:
   ]
 }
 ```
+
+- `users JOIN answers` を `updated_at DESC` で全件返却
+- 並べ替え（自分先頭・一致数 DESC）はフロント側で実施
 
 ## DB スキーマ
 
@@ -159,20 +129,105 @@ CREATE TABLE answers (
 );
 ```
 
-## 仕様メモ
+## 質問データ（`public/questions.json`）
 
-- 質問カードの Yes/No ボタンは `questions.json` の `emoji + Yes/No`、`label`、`description` を表示
-- 質問の最後に「回答を投稿する」ボタン。全問回答するまで disabled
-- 投稿時に `crypto.randomUUID()` で UUID を生成し localStorage（`fmp_uuid`）に保存
-- 名前は localStorage（`fmp_username`）にも保存し、再訪時のカード表示に使用
-- 投稿モーダルで名前未入力なら **ランダムな 8 桁の数字（先頭非 0）** が自動入力
-- **identity-card は投稿経験がある時のみ表示**（初回訪問では非表示）。カードのボタンは「みんなの回答を見る」（閲覧モーダルを開くのみ）
-- 閲覧モーダルは「自分が先頭行」「以降は一致回答数 DESC」「自分以外は名前後ろに `(一致数)`」
-- セル表示は `questions.json` の絵文字付きで `✅Yes` `🌴No` のように表示
-- 質問の数 N を増減したい場合は `public/questions.json` を編集するだけで OK（フロントは長さを動的に扱う）
+```json
+{
+  "source": "https://...",
+  "questions": [
+    {
+      "number": 1,
+      "q": "仕事・労働をしていますか？",
+      "a1": { "value": "Yes", "label": "している",  "description": "仕事・副業・ボランティアあり", "emoji": "✅" },
+      "a2": { "value": "No",  "label": "していない", "description": "完全にFIRE状態",            "emoji": "🌴" }
+    }
+  ]
+}
+```
+
+- 質問の数 N は `questions[]` の長さで決まる。**増減は JSON 編集だけで OK**（フロントが長さを動的に扱う）
+
+## クライアント状態（localStorage）
+
+| key            | 内容                                          |
+|----------------|-----------------------------------------------|
+| `fmp_uuid`     | 自分の UUID（投稿成功時に保存、再投稿時に再利用） |
+| `fmp_username` | 自分の名前（投稿モーダルの初期値・カード表示）    |
+
+## セットアップ手順
+
+### 1. Wrangler ログイン
+```bash
+npx wrangler login
+```
+
+### 2. D1 データベース作成
+```bash
+npx wrangler d1 create fire-matching-proto-db
+```
+出力された `database_id` を `wrangler.toml` に貼り付ける。
+```toml
+[[d1_databases]]
+binding = "DB"
+database_name = "fire-matching-proto-db"
+database_id = "<ここに貼る>"
+migrations_dir = "migrations"
+```
+
+### 3. Cloudflare API Token 作成
+Dashboard → My Profile → API Tokens → Create Token → テンプレ「**Edit Cloudflare Workers**」をベースに、以下を含む:
+
+- Account: Cloudflare Pages: Edit
+- Account: Workers Scripts: Edit
+- **Account: D1: Edit**（テンプレに無いので Add more で追加）
+- User: User Details: Read
+
+Zone Resources はドメインが無ければ「All zones from an account」でOK。Workers Routes の権限は不要なら削除可。
+
+### 4. Cloudflare Account ID 取得
+`npx wrangler whoami` で確認できる（Dashboard 右サイドバーにも表示）。
+
+### 5. GitHub Secrets 登録
+リポジトリ → Settings → Secrets and variables → Actions:
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+または `gh secret set <name> --repo <owner>/<repo>` で登録可。
+
+### 6. push でデプロイ
+```bash
+git add -A
+git commit -m "init"
+git push origin main
+```
+
+GitHub Actions が:
+1. リモート D1 にマイグレーション適用
+2. Pages プロジェクト作成（初回のみ、2回目以降は失敗するが `continue-on-error: true` で無視）
+3. `./public` を Pages にデプロイ
+
+## ローカル動作確認
+
+```bash
+# 1. ローカル D1 にマイグレーション適用
+npx wrangler d1 migrations apply fire-matching-proto-db --local
+
+# 2. Pages dev 起動（functions + D1 binding 込み）
+npx wrangler pages dev ./public
+```
+
+`http://127.0.0.1:8788/` をブラウザで開く。
+
+DB 中身確認:
+```bash
+npx wrangler d1 execute fire-matching-proto-db --local --command "SELECT * FROM users"
+npx wrangler d1 execute fire-matching-proto-db --local --command "SELECT * FROM answers"
+```
+
+リモート DB 確認は `--local` を `--remote` に置き換え。
 
 ## 既知の制約（プロト）
 
-- GET は全件返却（件数が増えたら pagination が必要）
-- 認証なし。UUID = 身分。localStorage を消すと別人扱い
-- フロントで一致数を計算しているため大量データには非対応
+- `GET /api/answers` は無条件で全件返却（件数が増えたら pagination が必要）
+- 認証なし。UUID = 身分証明。localStorage を消すと別人扱い、別ブラウザでも別人扱い
+- 並べ替え・一致数計算はフロント側のため大量データには非対応

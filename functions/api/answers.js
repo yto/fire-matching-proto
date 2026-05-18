@@ -1,4 +1,6 @@
 export async function onRequestPost({ request, env }) {
+  if (!isAllowedOrigin(request)) return forbidden();
+
   let body;
   try {
     body = await request.json();
@@ -34,7 +36,9 @@ export async function onRequestPost({ request, env }) {
   return json({ ok: true });
 }
 
-export async function onRequestGet({ env }) {
+export async function onRequestGet({ request, env }) {
+  if (!isAllowedOrigin(request)) return forbidden();
+
   const { results } = await env.DB.prepare(
     `SELECT u.uuid, u.username, a.answers, a.updated_at
      FROM users u JOIN answers a ON a.uuid = u.uuid
@@ -42,6 +46,24 @@ export async function onRequestGet({ env }) {
   ).all();
   const rows = (results || []).map((r) => ({ ...r, answers: JSON.parse(r.answers) }));
   return json({ rows });
+}
+
+function isAllowedOrigin(request) {
+  const reqHost = new URL(request.url).host;
+  for (const h of ["origin", "referer"]) {
+    const v = request.headers.get(h);
+    if (!v) continue;
+    try {
+      if (new URL(v).host === reqHost) return true;
+    } catch {
+      // ignore parse error
+    }
+  }
+  return false;
+}
+
+function forbidden() {
+  return new Response("Forbidden", { status: 403 });
 }
 
 function json(obj, status = 200) {

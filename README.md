@@ -90,6 +90,7 @@ Request:
 
 - validation: `uuid` 非空文字列、`username` 非空文字列、`answers` は `"Yes"` / `"No"` のみの配列
 - `users` と `answers` の両テーブルを `env.DB.batch([...])` で同一バッチで `INSERT ... ON CONFLICT(uuid) DO UPDATE`（UPSERT）
+- **Origin / Referer チェック**: リクエストの `Origin` または `Referer` がサーバ自身のホストと一致しない場合は **403** を返す（GET/POST 両方）
 
 Response: `{ "ok": true }` / エラー時 `{ "error": "..." }` (400)
 
@@ -231,3 +232,4 @@ npx wrangler d1 execute fire-matching-proto-db --local --command "SELECT * FROM 
 - `GET /api/answers` は無条件で全件返却（件数が増えたら pagination が必要）
 - 認証なし。UUID = 身分証明。localStorage を消すと別人扱い、別ブラウザでも別人扱い
 - 並べ替え・一致数計算はフロント側のため大量データには非対応
+- API の防御は Origin/Referer チェックのみ。curl 等で `Origin` ヘッダを偽装されれば突破可能（いたずら抑止レベル）

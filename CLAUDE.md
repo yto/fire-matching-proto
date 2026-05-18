@@ -60,3 +60,4 @@ npx wrangler d1 execute fire-matching-proto-db --local --command "SELECT * FROM 
 - 仕様変更時は **README.md の「画面・UX 仕様」セクション** と本ファイルを合わせて更新
 - `<dialog>` 要素 + `showModal()/close()` でモーダルを実装（独自モーダルライブラリは入れない）
 - フロント側で `[hidden]` を使う場合、対象要素の CSS で `display` が設定されていると上書きされる点に注意（`[hidden] { display: none !important; }` を `style.css` 冒頭に置いてある）
+- `functions/api/answers.js` は **Origin/Referer がサーバホストと一致しない場合 403** を返す簡易防御を持つ。新規 API を追加するときは同じ `isAllowedOrigin()` を通すこと

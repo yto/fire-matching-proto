@@ -105,8 +105,15 @@ h2 {
 .card .q {
   font-size: 1.05rem;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
   line-height: 1.5;
+}
+
+.card .q-desc {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 12px;
 }
 
 .card .btns {

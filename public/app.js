@@ -80,6 +80,7 @@ function renderQuestions() {
     card.innerHTML = `
       <div class="qnum">Q${q.number}</div>
       <div class="q"></div>
+      <div class="q-desc"></div>
       <div class="btns">
         <button type="button" data-ans="Yes">
           <span class="ans-main"></span>
@@ -94,6 +95,9 @@ function renderQuestions() {
       </div>
     `;
     card.querySelector(".q").textContent = q.q;
+    const qDesc = card.querySelector(".q-desc");
+    if (q.description) qDesc.textContent = q.description;
+    else qDesc.remove();
     const yesBtn = card.querySelector('button[data-ans="Yes"]');
     const noBtn = card.querySelector('button[data-ans="No"]');
     yesBtn.querySelector(".ans-main").textContent = `${q.a1.emoji} Yes`;
